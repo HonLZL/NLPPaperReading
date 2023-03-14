@@ -4,7 +4,7 @@
 
 Bert 依靠 mask 预训练，忽略了被 mask 位置的依赖关系，导致训练和预测是有差异的。
 
-XL 将自回归融入进预训练
+XLNet 将自回归融入进预训练
 
 
 
@@ -147,10 +147,43 @@ $$
 
 ## 3 Transformer-XL
 
-为了解决长距离编码
+### 3.1 [Transformer-XL](Transformer-XL.md) 的融入
+
+如何将 Transformer-XL 的递归机制应用到 XL-net 的置换，并使模型能够重用以前片段中的隐藏状态。
+
+设两个来自长度为 $T$ 的序列 $\mathbf{s}$ 的连续的片段为 $\tilde{\mathbf{x}}=\mathbf{s}_{1:T}$ 和 $\mathbf{x}=\mathbf{s}_{T+1:2T}$ 
+
+设 $\tilde{\mathbf{z}}$ 和 $\mathbf{z}$ 分别是 [1,···,T] [T+1,···,2T] 的两个排列。
+
+首先处理 $\tilde{\mathbf{z}}$ ， $\tilde{h}^{(m)}$ 是 $\tilde{\mathbf{z}}$ 第 $m$ 层的内容流的隐状态，需要缓存下来。知道了 $\tilde{\mathbf{z}}$ ，那么下一个片段 $\mathbf{z}$ 的内容流隐状态是：
+$$
+h_{z_t}^{(m)}\gets Attention(Q=h_{z_t}^{(m-1)},KV=\left [\mathbf{h}^{(m-1)}, \mathbf{h}_{\mathbf{z}_{\le t}}^{(m-1)} \right ]; \theta)
+$$
+KV 计算的 中括号表示维度拼接。
+
+注意，位置编码只依赖于**原始序列**中的实际位置，因此，上述注意力更新一旦获得 $\tilde{h}^{(m)}$ ，就与 $\tilde{\mathbf{z}}$ 无关，这样就可以在不知道上一段分解顺序的情况下，对内存进行缓存和重用。
+
+模型学习利用最后一个片段的所有排列的缓存信息，查询流用同样的方法运算。
+
+### 3.2 Modeling Multiple Segments
+
+  由于很多下游 NLP 任务中都包含了多个句子的情况，比如问答任务。下面我们讨论怎么在自回归框架下怎么预训练多个 segment。与训练阶段，和 BERT 一样，我们选择两个句子，它们是或者不是连续的句子（前后语义是否相关）。我们把这两个句子拼接后当成一个句子来学习 Permutation LM。和 BERT 一样，输入为 [CLS, A, SEP, B, SEP]，A、B 代表两个片段。根据消融实验，预训练不采用 NSP。
+
+​	不同于 BERT，XLNet 采用相对片段编码。
+
+BERT 使用的是绝对的 Segment 编码，也就是第一个句子对于的 Segment id 是 0，而第二个句子是 1。这样如果把两个句子换一下顺序，那么输出是不一样的。对于XLNet，给定序列一对位置 $i$, $j$ ，如果两个位置来自于同一个片段，就使用 segment encoding：$\mathbf{s}_{ij}=\mathbf{s}_{+}$ ,否则就是 $\mathbf{s}_{ij}=\mathbf{s}_{-}$ , $\mathbf{s}_{+}\ 和\ \mathbf{s}_{-}$是每个注意力头的可学习的参数。所以XLNet只考虑是否来自同一个片段，而不考虑到底来自于哪个片段，只对位置之间的关系建模。
+
+当我们从位置 $i$ attend to $j$ 的时候，我们会这样计算一个新的 attention score：
 
 
+$$
+a_{ij}=(\mathbf{q}_i+\mathbf{b})^{\top} s_{ij}
+$$
+其中 $\mathbf{q}_i$ 是第 $i$ 个位置的 Query 向量，$\mathbf{b}$ 是一个可学习的 bias，$s_{ij}$ 是一个可学习的 embedding。最后我们会把这个 attention score 加到原来计算的 Attention score 里，这样它就能学到当 $i$ 和 $j$ 都属于某个 segment 的特征，以及 $i$ 和 $j$ 属于不同 segment 的特征。
 
+## 4 总结
+
+和语言模型相比，XLNet最大的优势就是通过输入序列的各种排列，同时学习到上下文的信息。
 
 
 
@@ -159,4 +192,30 @@ $$
 
 
 参考： https://wmathor.com/index.php/archives/1475/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
