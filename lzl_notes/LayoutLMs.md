@@ -16,7 +16,7 @@
 
 
 
-![image-20230323161959454](C:\Users\lzl\Desktop\NLPPaperReading\lzl_notes\note_images\image-20230323161959454.png)
+![image-20230323161959454](note_images\image-20230323161959454.png)
 
 
 
@@ -66,7 +66,7 @@
 
 FUNSD 是一个文档理解数据集，其包含 199 张表单，每张表单中包含表单实体的键值对。
 
-| <img src="C:\Users\lzl\Desktop\NLPPaperReading\lzl_notes\note_images\86220490.png" alt="86220490" style="zoom: 50%;" /> | 原始格式 ：{<br/>    "form": [{},{},···{}]<br/>}<br/>form里每个 {} 都是一个 box<br/>里面有文本的bounding box<br/>具体内容 text<br/>label，是 question或answer <br/>以及id，等等<br/>最重要的是 linking，[x, y]<br/>指的是 key 的 id 和 value 的 id |
+| <img src="note_images\86220490.png" alt="86220490" style="zoom: 50%;" /> | 原始格式 ：{<br/>    "form": [{},{},···{}]<br/>}<br/>form里每个 {} 都是一个 box<br/>里面有文本的bounding box<br/>具体内容 text<br/>label，是 question或answer <br/>以及id，等等<br/>最重要的是 linking，[x, y]<br/>指的是 key 的 id 和 value 的 id |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 
 
@@ -85,7 +85,7 @@ FUNSD 是一个文档理解数据集，其包含 199 张表单，每张表单中
 
 预训练技术被广泛的应用于 NLP 任务，针对于文本。而在文档中，布局和样式等信息同样是很重要的。
 
-![image-20230323201414873](C:\Users\lzl\Desktop\NLPPaperReading\lzl_notes\note_images\image-20230323201414873.png)
+![image-20230323201414873](note_images\image-20230323201414873.png)
 
 
 
@@ -109,7 +109,7 @@ FUNSD 是一个文档理解数据集，其包含 199 张表单，每张表单中
 
 需要注意的是，Image Embedding 和其他是分隔开的，Image Embedding 在 Layout 预训练之后加的。
 
-![image-20230324094503830](C:\Users\lzl\Desktop\NLPPaperReading\lzl_notes\note_images\image-20230324094503830.png)
+![image-20230324094503830](note_images\image-20230324094503830.png)
 
 
 
@@ -129,7 +129,7 @@ FUNSD 是一个文档理解数据集，其包含 199 张表单，每张表单中
 
 1. **Masked Visual-Language Model (MVLM)** 掩码式语言模型
 
-​	大量实验已经证明 MLM 能够在预训练阶段有效地进行自监督学习。在此模型 MVLM 基础上进行了修改：在遮盖 (MASK) 当前词之后，保留对应的 2-D　Position　Embedding 暗示，让模型预测对应的词。在这种方法下，模型根据已有的上下文和对应的视觉暗示预测被遮罩的词，从而让模型更好地学习文本位置和文本语义的模态`对齐关系`。
+​	大量实验已经证明 MLM 能够在预训练阶段有效地进行自监督学习。在此模型 MVLM 进行了修改：在遮盖 (MASK) 当前词之后，保留对应的 2-D　Position　Embedding 暗示，让模型预测对应的词。在这种方法下，模型根据已有的上下文和对应的视觉暗示预测被遮罩的词，从而让模型更好地学习文本位置和文本语义的模态`对齐关系`。
 
 2. **Multi-label Document Classification (MDC)** 多标签文档分类
 
@@ -139,7 +139,7 @@ FUNSD 是一个文档理解数据集，其包含 199 张表单，每张表单中
 
 **微调** 
 
-微调了三个任务：表达理解，发票理解，文档图片分类。
+微调了三个任务：表单理解，发票理解，文档图片分类。
 
 对于表单和发票理解，模型对每个 token 预测出 {B,I,E,S,O} 标签，然后使用到数据库中检测每个实体的类型。
 
@@ -203,7 +203,7 @@ $$
 
 视觉编码在 预训练过程 中也进行参数更新。
 
-输出的 feature map 是 宽 $W$，高 $H$，然后它被摊平到一个长度为 $W\times H$ 的 visual embedding 序列，叫做 \$\text{VisTokEmb}(I)$，然后对其添加一个线性投影层 $\text{Proj()}$ 去与 text embedding 的维度统一。
+输出的 feature map 是 宽 $W$，高 $H$，然后它被摊平到一个长度为 $W\times H$ 的 visual embedding 序列，叫做 $\text{VisTokEmb}(I)$，然后对其添加一个线性投影层 $\text{Proj()}$ 去与 text embedding 的维度统一。
 
 因为 CNN 视觉 backbone 不能获得位置信息，所以再添加一个 1D positional embedding。这个 embedding 是与 text embedding 共享的。
 
@@ -270,13 +270,13 @@ $$
 $$
 
 
-![image-20230325184420091](C:\Users\lzl\Desktop\NLPPaperReading\lzl_notes\note_images\image-20230325184420091.png)
+![image-20230325184420091](note_images\image-20230325184420091.png)
 
-![image-20230325184454835](C:\Users\lzl\Desktop\NLPPaperReading\lzl_notes\note_images\image-20230325184454835.png)
+![image-20230325184454835](note_images\image-20230325184454835.png)
 
 
 
-### 3.2 预训练任务
+### 3.2 预训练任务 
 
 1. **Masked Visual-Language Modeling （MVLM）** 和 LayoutLM 一样，随机 mask 一些 text tokens，但是这个 token 的 2D position仍然保留，然后询问模型去复原 mask 的tokens，鼓励模型采用 layout 信息辅助 token 补全。但是在 v2 中，layout 信息也被添加进去了，所以也需要 mask 掩码部分在原图的 bounding box。
 
@@ -298,47 +298,204 @@ $$
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ## 4 LayoutLMv3
 
+### 4.1 背景
+
+引入基于 patch 的视觉表征模式，放弃了基于 CNN 为主干的视觉特征提取器。
 
 
 
 
 
+### 4.2 模型
+
+
+
+<img src="note_images\image-20230403144624762.png" alt="image-20230403144624762" style="zoom:67%;" />
+
+
+
+**文档预处理** 
+
+不在依赖于每个 token 的 bbox 信息，而是整个文本框的 bbox。
+
+图片resize 到 224*224，每张图切分为 P×P 个 patches，（P=16）。
+
+思想来自于 BEiT，BEiT 的结构如下：
+
+<img src="note_images\image-20230403145059334.png" alt="image-20230403145059334" style="zoom:50%;" />
+
+
+
+**图像 Embedding**：采用与 BEiT 模型一致的图像 Embedding 操作
+
+1. 图片切分为 patches。
+2. 采用一个 conv2d 将 patch 的 embedding 维度与 text embedding 对齐，stride 与 patch size 一致。
+3. Flatten 为一个 visuak token embedding 序列
+
+
+
+**文本 Embedding**：采用 RoBERTa 初始化 text embedding
+
+
+
+**Positional embedding**：
+
+1. 1-D position embedding：text 和 视觉部分分别编号
+
+2. 2-D position embedding：
+
+   text 部分：由于每个 segment 中会有多个 token 共享一个 bbox，所以会有多个 token 共享相同的 2D 位置编码，2D 位置编码与 layoutLM-v2 一致
+
+   patch 部分：原论文指出 patch 使用绝对位置编码没有太大作用
+
+   相对位置编码：与 layoutLM-v2 一致，夹在注意力分数矩阵中
+
+
+
+LayoutLM-v3 采用 RoBERTa 初始化 encoder 层，RoBERTa 预训练时：
+
+1. 采用动态 MASK 
+2. 没有 NSP 任务 
+3. 预训练时，用更大的 batch size 
+4. Byte-Pair Encoding ，BPE解码方式
+
+
+
+![image-20230403150158364](note_images\image-20230403150158364.png)
+
+
+
+### 4.3 预训练
+
+**MLM** 
+
+1. 遮掩文字 token，要求模型补全
+2. Span-based masking：与 SpanBERT 类似，每次遮掩时选择一个 span（长度采样满足均值为 3 的泊松分布）
+3. 遮掩 30% 的token
+
+
+
+**MIM** (masked image modeling)
+
+1. 与 BEiT 的预训练任务一致
+2. 需要提前准备一个 image tokenizer （基于离散 VAE，即 dVAE），将图片离散化为 P×P 个 tokens
+3. 视觉词汇表大小为：8192
+4. Blockwise masking：与 SpanBERT 里的 span based masking 类似，先选定一个区域，全部mask，增大预训练难度
+5. 遮掩 40% 的 image tokens
+
+
+
+**word-patch alignment** 
+
+1. 促进文本/图片信息的对齐
+2. 如果一个 woed 对应的 patch 被遮掩，则这个 word 标为 aligned，否则是 not aligned
+3. 被 mask 的文本不进行标记
+
+
+
+**实验设置**
+
+1. LayoutLM-v3 采用 RoBERTa 初始化 encoder 层和 text embedding
+2. 图片 resize 到 224×224，patch 数量为 16×16，所以每张图片对应 196 个 visual tokens
+3. 预训练语料：IITCDIP Test Collection1.0，有11million的文档，42 million 张图片，并且不做图像增强
+4. Image tokenizer：复用 DiT 模型的 tokenizer，因为同样都是文档预训练领域，比 BEiT 的更适合
+5. Batch size：2048
+
+
+
+### 4.4 微调
+
+**FUNSD** 表单实体抽取
+
+**CORD** 收据的信息提取
+
+**EPHOIE** 中文，联系题/试卷中的信息抽取
+
+**XFUND** 多语言表单的实体抽取
+
+**DocVQA** 视觉文档问答
+
+**PubLayNet** 文档布局分析
+
+
+
+## 5 LayoutXLM
+
+### 5.1 背景
+
+当前存在的文档理解模型都是针对单一语言进行的，本文提出的语言模型目的是为了解决语言障碍。
+
+也有跨语言的语言模型，但是没有针对富文本文档的，是纯文本的，LayoutXLM 对不同种语言。
+
+此外不同种语言对应的文档布局，视觉信息都是有差别的，不同国家的文档布局不一样。
+
+同时引入数据集 XFUND，包含多种语言的文档数据集，有中文，日语，西班牙语，法语，意大利语，德语，葡萄牙语）
+
+
+
+### 5.2 模型
+
+类似于 LayoutLM-v2。
+
+
+
+![image-20230412161537125](note_images\image-20230412161537125.png)
+
+
+
+### 5.3 预训练
+
+#### 5.3.1 预训练任务
+
+使用多种语言的文档进行预训练。
+
+1. Multilingual Masked Visual-Language Modeling
+
+   通过上下文以及 layout 信息（2D position），去预测被 mask 的 token。
+
+   在 LayoutLM 前两个版本中，每个单词是英文中的基本单位，在其他语言中，不一定是这样。
+
+   为了阻止特定语言的预处理，本文采用字符集的 bounding boxes。在使用 **SentencePiece** 之后，首先通过合并每个 token 所包含的所有 字符 的 bounding boxes 去计算每个 token 的 bounding box，通过这种方法，能有效地统一多语言多模态输入。
+
+2. Text-Image Alignment
+
+   随机选择文本行，然后 cover 对应的图片区域，然后使用对应的text token预测图片中的token line是否被覆盖。
+
+3. Text-Image Matching
+
+​	文本和图片是否来自于同一个文档
+
+#### 5.3.2 预训练数据
+
+有 53 种语言的文档图片。
+
+pipeline：
+
+==Data Collection== 
+
+使用**可解析的 **PDF 文件 
+
+
+
+==Pre-processing==
+
+使用 PyMuPDF 库对 PDF 进行解析,提取文本，布局，图片。
+
+使用 BlingFire 的语言分割器，按照语言来分割数据。
+
+使用 CCNet 判断文档属于哪一种语言，language score 超过 0.5，归类为该语言，否则不归为该语言。
+
+
+
+==Data Sampling== 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+下面就是在介绍数据集了。
 
 
 

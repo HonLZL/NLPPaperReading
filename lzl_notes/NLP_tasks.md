@@ -1,4 +1,4 @@
-# 基于预训练模型的 NLP 任务
+# 基于预训练模型的 NLP 数据集与任务 
 
 
 
@@ -207,7 +207,7 @@
 
   
 
-2 CORD 任务
+## 2 CORD 
 
 | <img src="C:\Users\lzl\Desktop\NLPPaperReading\lzl_notes\note_images\output.png" alt="output"  /> | ![output](C:\Users\lzl\Desktop\NLPPaperReading\lzl_notes\note_images\output2345.png) |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -239,9 +239,21 @@
 
 
 
+## 3 FUNSD
+
+<img src="note_images\0060308251.png" alt="0060308251" style="zoom:67%;" />
 
 
 
+标注是 .json 文件，包含
+
+文本的 box，文本内单词的 box
+
+文本的 label，linking
+
+## 4 XFND
+
+同上，但是有多种语言，图片也更清晰了。
 
 
 
