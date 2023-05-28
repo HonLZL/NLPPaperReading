@@ -389,6 +389,21 @@ RUN cd transformers && python3 setup.py develop
 
 ## 二 容器的常用命令
 
+### 0 启动，关闭，重启 docker
+
+1. 启动docker
+
+systemctl start docker
+2. 关闭docker
+
+systemctl stop docker
+3. 重启docker
+
+systemctl restart docker
+4. 查看docker运行状态
+
+systemctl status docker
+
 ### 1 从镜像中创建容器
 
 - **-a stdin:** 指定标准输入输出内容类型，可选 STDIN/STDOUT/STDERR 三项；
@@ -416,7 +431,7 @@ RUN cd transformers && python3 setup.py develop
 **常用的有 -p、-v、-it、-d、--name** 
 
 ```powershell
-docker run -it -P -v C:\\Users\\lzl\\Desktop\\ai\\docker_data:/data/docker_data  --name first_pyhton python:latest /bin/bash
+docker run -itd -p 80:8080 -v D:\Desktop\ai\DocumentIE\docker_data:/data/docker_data  --name first_pyhton python:latest /bin/bash
 ```
 
 **创建一个新的容器但不启动它,用法和run一样** 
@@ -480,11 +495,402 @@ docker unpause 容器ID
 **进入容器** 
 
 ```powershell
-docker attach --sig-proxy=false ID
+docker attach 容器ID
 ```
 
 (attach是可以带上--sig-proxy=false来确保CTRL-D或CTRL-C不会关闭容器 --亲测没用)
 
+```powershell
+docker exec -it 容器ID /bin/bash
+docker exec：推荐大家使用 docker exec 命令，因为此命令会退出容器终端，但不会导致容器的停止。
+```
+
+OPTIONS说明：
+
+- **-d :**分离模式: 在后台运行
+- **-i :**即使没有附加也保持STDIN 打开
+- **-t :**分配一个伪终端
 
 
-### 3 
+
+### 3 容器导出为镜像
+
+```sh
+docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]
+```
+
+OPTIONS说明：
+
+- **-a :**提交的镜像作者；
+- **-c :**使用Dockerfile指令来创建镜像；
+- **-m :**提交时的说明文字；
+- **-p :**在commit时，将容器暂停。
+
+例如
+
+
+
+docker commit -a "honlzl" -m "cuda+pytorch+anaconda" 1ba4 conda_torch:v1
+
+```sh
+docker commit -a "honlzl" -m "cuda+pytorch+anaconda" a404c6c174a2  layout_base:v1 
+```
+
+**docker save :** 将指定镜像保存成 tar 归档文件。
+
+语法
+
+```sh
+docker save [OPTIONS] IMAGE [IMAGE...]
+```
+
+OPTIONS 说明：
+
+- **-o :**输出到的文件。
+
+例如
+
+```sh
+docker save -o my_layout_v1.tar layout_base:v1
+```
+
+
+
+### 4 删除镜像
+
+```
+docker rmi ID
+```
+
+
+
+## 三 记录一次使用
+
+### 1 创建镜像、容器
+
+有两种方式对当前镜像进行修改
+
+- 1、从已经创建的容器中更新镜像，并且提交这个镜像
+- 2、使用 Dockerfile 指令来创建一个新的镜像
+
+首先使用第一种方式创建镜像，
+
+到 docker 网站，选择合适的原始镜像 https://hub.docker.com/r/nvidia/cuda/tags
+
+> nvidia docker 容器中devel runtime base三种文件的区别
+>
+> base版本：
+> 该版本是从cuda9.0开始，包含了部署预构建cuda应用程序的最低限度（libcudart）。
+> 如果用户需要自己安装自己需要的cuda包，可以选择使用这个image版本，但如果想省事儿，则不建议使用该image，会多出许多麻烦。
+> runtime版本：
+> 该版本通过添加cuda工具包中的所有共享库开扩展基本image。如果使用多个cuda库的预构建应用程序，可使用此image。但是如果想借助cuda中的头文件对自己的工程进行编译，则会出现找不到文件的错误。
+> devel版本：
+> 通过添加编译器工具链，测试工具，头文件和静态库来扩展运行的image，使用此图像可以从源代码编译cuda应用程序。
+
+
+
+```powershell
+docker pull 11.6.1-cudnn8-devel-ubuntu20.04
+```
+
+随后从镜像，新建一个容器，取名为 layoutlm，首先要保证 映射的本地文件夹是空的 
+
+docker run -itd -p 8888:22 -v /home/lzl/docker_data:/data/docker_data  --name doc --gpus all continuumio/anaconda3:latest /bin/bash
+
+
+
+--gpus=all 
+
+```powershell
+docker run -itd -p 80:8080 -v D:\Desktop\ai\DocumentIE\docker_data:/data/docker_data  --name layoutlm nvidia/cuda:11.6.1-cudnn8-devel-ubuntu20.04 /bin/bash
+```
+
+```bash
+docker run -itd -p 8888:22 --gpus "device=0" -v D:\Desktop\ai\DocumentIE\docker_layout2:/data/docker_data --name layout_v2 layout_base:v2 /bin/bash
+```
+
+更新 apt
+
+```text
+apt-get update
+```
+
+安装vim, sudo
+
+```powershell
+apt-get install vim
+apt-get install sudo
+```
+
+==linux 换源== 
+
+> 备份原来的sorce文件：sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
+> 修改sources.list文件：sudo gedit /etc/apt/sources.list
+> 添加阿里、中科大镜像源, 覆盖到sources.list里，保存：
+>
+>     # 中科大镜像源
+>     deb https://mirrors.ustc.edu.cn/ubuntu/ bionic main restricted universe multiverse
+>     deb-src https://mirrors.ustc.edu.cn/ubuntu/ bionic main restricted universe multiverse
+>     deb https://mirrors.ustc.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse
+>     deb-src https://mirrors.ustc.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse
+>     deb https://mirrors.ustc.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse
+>     deb-src https://mirrors.ustc.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse
+>     deb https://mirrors.ustc.edu.cn/ubuntu/ bionic-security main restricted universe multiverse
+>     deb-src https://mirrors.ustc.edu.cn/ubuntu/ bionic-security main restricted universe multiverse
+>     deb https://mirrors.ustc.edu.cn/ubuntu/ bionic-proposed main restricted universe multiverse
+>     deb-src https://mirrors.ustc.edu.cn/ubuntu/ bionic-proposed main restricted universe multiverse
+>     
+>     # 阿里镜像源
+>     deb http://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse
+>     deb http://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse
+>     deb http://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
+>     deb http://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse
+>     deb http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
+>     deb-src http://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse
+>     deb-src http://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse
+>     deb-src http://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
+>     deb-src http://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse
+>     deb-src http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
+>     
+>
+> 再次更新源：sudo apt-get update
+
+
+
+在容器里操作
+
+```sh
+apt install -y git python3 python3-pip wget
+```
+
+which python3 查看 python3 的安装目录
+
+apt install -y wget 
+
+安装anaconda
+
+```sh
+wget https://repo.continuum.io/archive/Anaconda3-2021.11-Linux-x86_64.sh
+```
+
+默认安装到 /root/anaconda3 
+
+```shell
+vim ~/.bashrc 
+添加export PATH=/root/anaconda3/bin:$PATH
+source ~/.bashrc
+```
+
+conda 换源
+
+```shell
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge 
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/
+conda config --set show_channel_urls yes
+```
+
+pip 换源
+
+```txt
+pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
+
+
+下载 pytorch 的包并安装
+
+```sh
+wget https://download.pytorch.org/whl/cu116/torch-1.12.0%2Bcu116-cp38-cp38-linux_x86_64.whl
+wget https://download.pytorch.org/whl/cu115/torchvision-0.12.0%2Bcu115-cp38-cp38-linux_x86_64.whl
+```
+
+
+
+
+
+导出容器为镜像，将镜像进行导出，最终生成一个 zip 压缩包，所以最终获得的镜像是由对应 cuda，pytorch，anaconda 的 ubuntu20.04 系统，大小约17G。
+
+
+
+
+
+```
+RUN [ ${#PYTORCH} -gt 0 ] && VERSION='torch=='$PYTORCH'.*' ||  VERSION='torch'; python3 -m pip install --no-cache-dir -U $VERSION --extra-index-url https://download.pytorch.org/whl/cu113
+```
+
+### 2 改写为 Dockerfile
+
+### 3 保存容器与镜像
+
+
+
+
+
+
+
+
+
+docker run -itd -p 8888:22 -v D:\Desktop\ai\DocumentIE\docker_layout:/data/docker_data  --name layout layout_base:v1 /bin/bash
+
+
+
+
+
+
+
+
+
+
+
+
+
+将以上步骤写成 Dockerfile，结果为：
+
+```dockerfile
+FROM nvidia/cuda:11.6.1-cudnn8-devel-ubuntu20.04
+LABEL maintainer="honlzl"
+RUN apt update
+RUN python3 -m pip install --no-cache-dir --upgrade pip
+
+ARG PYTORCH='1.7.1+cu101'
+ARG TORCH_VISION='0.8.2+cu101'
+ARG TRANSFORMERS='4.5.1'
+ARG DETECTRON2='0.3'
+ARG SEQEVAL='1.2.2'
+
+apt-get install vim
+apt-get install sudo
+
+RUN python3 -m pip install -f https://download.pytorch.org/whl/torch_stable.html -i https://pypi.doubanio.com/simple
+```
+
+
+
+### 4 第 2 次从头创建镜像
+
+ubuntu 安装和使用 NVIDIA-Docker，不必自己安装 cuda、cuddn 等 NVIDIA 机器学习环境                
+
+拉取含有 anaconda3 的镜像
+
+```sh
+docker pull continuumio/anaconda3:latest
+```
+
+创建容器
+
+```sh
+docker run -itd -p 8888:22 -v /home/lzl/docker_data:/data/docker_data  --name docu --gpus all continuumio/anaconda3:latest /bin/bash
+```
+
+进入容器
+
+```sh
+docker exec -it 1ba4 /bin/bash
+```
+
+安装 pytorch
+
+```sh
+wget https://download.pytorch.org/whl/cu117/torch-1.13.1%2Bcu117-cp310-cp310-linux_x86_64.whl
+pip install https://download.pytorch.org/whl/cu117/torch-1.13.1%2Bcu117-cp310-cp310-linux_x86_64.whl
+```
+
+修改容器密码
+
+```sh
+passwd
+```
+
+更新 apt-get
+
+```sh
+apt-get update
+```
+
+安装 vim
+
+```
+apt-get install vim
+```
+
+安装 shh
+
+```sh
+apt-get install openssh-server
+```
+
+打开并修改ssh的配置文件，允许通过ssh远程访问docker。
+
+```bash
+vim /etc/ssh/sshd_config
+1
+```
+
+将如下代码贴入sshd_config文件中
+
+```bash
+PermitRootLogin yes #允许root用户使用ssh登录 
+1
+```
+
+启动ssh服务，至此，服务器端配置完毕。
+
+```bash
+service ssh restart
+```
+
+
+
+pycharm 连接
+
+ip为服务器 IP，端口为 docker 映射到服务器的端口
+
+用户名为 docker 里的用户名
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 四 Pycharm 远程连接 docker
+
+### 1 连接的本地 docker 容器
+
+在容器内安装 ssh  sudo apt-get install ssh
+
+修改 ssh 配置文件 
+
+vim /etc/ssh/sshd_config
+
+添加以下内容
+
+```txt
+RSAAuthentication yes #启用 RSA 认证
+PubkeyAuthentication yes #启用公钥私钥配对认证方式
+AuthorizedKeysFile .ssh/authorized_keys #公钥文件路径（和上面生成的文件同）
+PermitRootLogin yes #root能使用ssh登录
+```
+
+重启服务 service ssh restart
+
+开启服务 sudo service ssh start
+
+### 2 连接服务器 docker 容器
