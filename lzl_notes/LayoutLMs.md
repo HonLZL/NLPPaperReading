@@ -304,10 +304,6 @@ $$
 
 引入基于 patch 的视觉表征模式，放弃了基于 CNN 为主干的视觉特征提取器。
 
-
-
-
-
 ### 4.2 模型
 
 
@@ -419,7 +415,7 @@ LayoutLM-v3 采用 RoBERTa 初始化 encoder 层，RoBERTa 预训练时：
 
 **PubLayNet** 文档布局分析
 
-
+![image-20230802214856344](note_images\image-20230802214856344.png)
 
 ## 5 LayoutXLM
 

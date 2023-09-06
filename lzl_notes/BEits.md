@@ -13,13 +13,11 @@ BERT 在 NLP 领域的预训练取得了很大的成功，其中的 MLM 预训�
 
 
 
-## 2 BEITS: BERT Pre-Training of Image Transformers
+## 2 BEIT: BERT Pre-Training of Image Transformers
 
 ### 2.1 简介
 
 提出 MIM（masked image model）预训练任务，
-
-
 
 
 
@@ -55,7 +53,7 @@ BERT 在 NLP 领域的预训练取得了很大的成功，其中的 MLM 预训�
 使用 **tokenizer** 将图片分词
 
 1. 图片 $x\in \mathbb{R}^{H\times W\times C}$ tokenize 到 $\mathbf{z}=[z_1,...,z_N]\in \mathcal{V}^{h\times w}$， $\mathcal{V}=\{1,...|\mathcal{V}|\}$包含了离散的 token 索引
-2. 使用 **dVAE** ，将一块 patch 映射到一个 token z，模型基于 z 可以重建这个 patch。这个过程成为 图片的 tokenize，使用的是 `DALL-E` 的 image tokenizer。本文将图片 分为 14×14 个 patches，也就是对应 196 个 tokens，实验中，$|\mathcal{V}|=8192$ 
+2. 使用 **dVAE** ，将一块 patch 映射到一个 token z，模型基于 z 可以重建这个 patch。这个过程称为 图片的 tokenize，使用的是 `DALL-E` 的 image tokenizer。本文将图片 分为 14×14 个 patches，也就是对应 196 个 tokens，实验中，$|\mathcal{V}|=8192$ 
 
 
 
@@ -69,7 +67,7 @@ Image Transformer，同 VIT
 
 最终输入为 $\boldsymbol{H}_{0}=\left[e_{[\mathrm{S}]}, \boldsymbol{E} \boldsymbol{x}_{i}^{p}, \ldots, \boldsymbol{E} \boldsymbol{x}_{N}^{p}\right]+\boldsymbol{E}_{p o s}$   
 
-
+最后一层的输出是 $\boldsymbol{H}^{L}=[h^L_{[\mathrm{S}]},h^L_{\mathrm{1}},...,h^L_{\mathrm{N}}]$，被用到 encoded 表示，$h_i^L$ 是第 i 个 image patch 的特征向量。
 
 
 
@@ -77,11 +75,9 @@ Image Transformer，同 VIT
 
 Masked Image Modeling
 
-随机 mask 一定比例的 image patches，（40%），然后去预测对应 这些 patches 的 visual tokens
+随机 mask 一定比例的 image patches，（40%），然后去预测对应这些 patches 的 visual tokens
 
-被 mask 的位置被表示为 $\mathcal{M}\in \{1,...,N\}^{0.4N}$，用可学习的 embedding $e_{[M]} \in \mathbb{R}^D$
-
-被破坏的 image patches $x^{\mathcal{M}}=\{x_i^p:i\notin \mathcal{M}\}_{i=1}^N \cup\{ e_{[M]}:i\in \mathcal{M} \}_{i=1}^N$ ，将其喂进 transformer，
+被 mask 的位置被表示为 $\mathcal{M}\in \{1,...,N\}^{0.4N}$，用可学习的 embedding $e_{[M]} \in \mathbb{R}^D$ 代替被破坏的 image patches $x^{\mathcal{M}}=\{x_i^p:i\notin \mathcal{M}\}_{i=1}^N \cup\{ e_{[M]}:i\in \mathcal{M} \}_{i=1}^N$ ，将其喂进 transformer，
 
 最终的隐藏向量 $\{h_i^L\}_{i=1}^N$ 被当做是输入 patches 的 encoded representations。对每一个 被 mask 的位置，使用 softmax classifier 去预测对应的 visual tokens，
 
@@ -92,16 +88,27 @@ $$
 \max \sum_{x \in \mathcal{D}} \mathbb{E}_{\mathcal{M}}\left[\sum_{i \in \mathcal{M}} \log p_{\text {MIM }}\left(z_{i} \mid x^{\mathcal{M}}\right)\right]
 $$
 
+$\mathcal{D}$ 是训练的语料库，$\mathcal{M}$ 代表随机 mask 的位置，$x^{\mathcal{M}}$ 代表被 mask 的图像。
 
 
 
+![image-20230802155732882](note_images\image-20230802155732882.png)
 
 
 
+不使用随机 mask 位置 $\mathcal{M}$ 的方法，而是应用分块(blockwise) mask的方法。如上图。
+
+每次 mask 一块图像的 patchs。对于每个block，设置最小的 patch 数量为 16，然后随机选择一定比例取mask，重复以上步骤，直到获得足够多的 masked patches，$0.4N$，$N$ 是总的图像 patches 数量，0.4 是 mask 的比例。
 
 
 
+## 3 微调模型
 
+在预训练BEIT之后，作者在Transformer上附加一个任务层，并微调下游任务上的参数。本文以图像分类和语义分割为例。通过BEIT。
+
+图像分类：直接用一个线性层
+
+语义分割：对于语义分割，作者遵循SETR-PUP中使用的任务层。具体来说，使用预训练的BEIT作为主干编码器，并结合几个deconvolution层作为解码器来产生分割。该模型也进行了端到端的微调，类似于图像分类。
 
 
 

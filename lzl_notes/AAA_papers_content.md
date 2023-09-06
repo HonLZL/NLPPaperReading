@@ -159,3 +159,13 @@ LayoutLMv3: Pre-training for Document AI with Unified Text and Image Masking
 ## 3 GeoLayoutLM
 
 GeoLayoutLM: Geometric Pre-training for Visual Information Extraction
+
+[notebooks](GeoLayoutLM.md)
+
+
+
+## 4 DiT
+
+DiT: Self-supervised Pre-training for Document Image Transformer
+
+[notebooks](Dit.md) 
