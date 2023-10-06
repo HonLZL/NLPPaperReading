@@ -26,7 +26,7 @@ BART 可以看作是 BERT 和 GPT 的结合，似乎又回到了 transformer。
 
 
 
-<img src="C:\Users\lzl\Desktop\NLPPaperReading\lzl_notes\note_images\image-20230215194738400.png" alt="image-20230215194738400" style="zoom:50%;" />
+<img src="note_images\image-20230215194738400.png" alt="image-20230215194738400" style="zoom:50%;" />
 
 
 
