@@ -7,7 +7,7 @@
 
 DocFormer 采用通过 CNN decoder 重建图像像素
 SelfDoc 提出对 mask 区域特征进行回归<br>
-Layoutlm3 通过重建视觉模态的 makked patch token，引入 word-patch 对齐目标。<br>
+LayoutLMv3 通过重建视觉模态的 makked patch token，引入 word-patch 对齐目标。<br>
 patch 级别的预训练表现的很有前景，然而在预训练过程中，研究出更有效或更细粒度的对齐技术需要大量的计算成本和时间。<br>
 本文提出的问题，能否微调一个预训练模型，使其适应具有对齐目标的下游任务，并达到更好的性能。<br>
 
@@ -30,7 +30,7 @@ AETNet(**A**lignment-**E**nriched **T**uning **N**et)<br>
 
 ### 2.2 微调目标
  包含五个目标：<br>
- 
+
 **下游任务的主观目标 subjective objective(SO)<br>
 全局跨模态对齐 global-level cross-modal alignment (GCMA)<br>
 全局内部模态对比 global-level intra-modal contrastive (GIMC) <br>
